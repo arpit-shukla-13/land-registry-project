@@ -18,8 +18,6 @@ mongoose.connect(MONGO_URI)
 
 // --- API Routes ---
 
-// This is the endpoint our frontend will send data to
-// Purane app.post ko is naye wale se replace karein
 app.post('/register-land', async (req, res) => {
     try {
         console.log("Received data:", req.body);
@@ -30,8 +28,8 @@ app.post('/register-land', async (req, res) => {
             ownerWalletAddress: req.body.ownerWalletAddress,
             propertyAddress: req.body.propertyAddress,
             landArea: req.body.landArea,
-            propertyValue: req.body.propertyValue, // Naya field
-            previousOwnerName: req.body.previousOwnerName || "N/A" // Naya field
+            propertyValue: req.body.propertyValue, 
+            previousOwnerName: req.body.previousOwnerName || "N/A" 
         });
 
         const savedLand = await newLand.save();
@@ -43,18 +41,16 @@ app.post('/register-land', async (req, res) => {
     }
 });
 
-// ... app.post('/register-land', ...) ke neeche yeh add karein ...
 
-// Yeh endpoint on-chain ID ko MongoDB mein update karega
 app.patch('/update-onchain-id/:mongoId', async (req, res) => {
     try {
-        const { mongoId } = req.params; // URL se MongoDB ki ID nikalein
-        const { onChainId } = req.body; // Request se on-chain ID nikalein
+        const { mongoId } = req.params; 
+        const { onChainId } = req.body;
 
         const updatedLand = await Land.findByIdAndUpdate(
             mongoId,
             { onChainId: onChainId },
-            { new: true } // Yeh option update kiya hua naya data return karta hai
+            { new: true } 
         );
 
         if (!updatedLand) {
