@@ -7,15 +7,13 @@ pragma solidity ^0.8.24;
  */
 contract LandRegistry {
 
-    // The Land struct now stores a hash of the sensitive off-chain data
-    // instead of the data itself, saving cost and preserving privacy.
     struct Land {
         uint landId;            // Unique ID for the land (on-chain)
         address owner;          // The current owner's wallet address (on-chain)
         bytes32 dataHash;       // A secure hash (digital fingerprint) of the off-chain data (on-chain)
         string propertyAddress; // Non-sensitive data that can be stored on-chain for quick reference
         string landArea;        // Non-sensitive data
-        bool isForSale;         // Status for future features
+        bool isForSale;         // Status for future features (e.g., marketplace)
         uint price;             // Price for future features
     }
 
@@ -24,8 +22,14 @@ contract LandRegistry {
     uint public landCount;
 
     // Event to notify the frontend/listeners that a new land has been registered.
-    // This is more efficient than manually querying for changes.
     event LandRegistered(uint indexed landId, address indexed owner, bytes32 dataHash);
+
+    // --- NEW: Event to notify when land ownership is transferred ---
+    event LandTransferred(
+        uint indexed landId,
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     // The constructor sets the deployer of the contract as the government authority.
     constructor() {
@@ -35,6 +39,13 @@ contract LandRegistry {
     // A security modifier to ensure only the government authority can call certain functions.
     modifier onlyGovernment() {
         require(msg.sender == governmentAuthority, "Only government authority can perform this action");
+        _;
+    }
+
+    // --- NEW: A modifier to ensure only the current owner of the land can perform certain actions ---
+    modifier onlyLandOwner(uint _landId) {
+        require(landRecords[_landId].owner != address(0), "Land does not exist.");
+        require(landRecords[_landId].owner == msg.sender, "Only the current owner can perform this action.");
         _;
     }
 
@@ -66,5 +77,25 @@ contract LandRegistry {
 
         // Emit the event to notify the application that a registration occurred
         emit LandRegistered(landCount, _owner, _dataHash);
+    }
+
+    /**
+     * @dev Transfers ownership of a registered land parcel.
+     * Only the current owner of the land can initiate the transfer.
+     * @param _landId The unique ID of the land parcel to transfer.
+     * @param _newOwner The wallet address of the new owner.
+     */
+    function transferOwnership(uint _landId, address _newOwner)
+        public
+        onlyLandOwner(_landId) // Only current owner can call this
+    {
+        require(_newOwner != address(0), "New owner address cannot be zero.");
+        require(_newOwner != landRecords[_landId].owner, "New owner cannot be the current owner.");
+
+        address previousOwner = landRecords[_landId].owner;
+        landRecords[_landId].owner = _newOwner; // Update the owner
+
+        // Emit the event to record the transfer
+        emit LandTransferred(_landId, previousOwner, _newOwner);
     }
 }
