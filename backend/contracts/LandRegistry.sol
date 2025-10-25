@@ -42,12 +42,12 @@ contract LandRegistry {
         _;
     }
 
-    // --- NEW: A modifier to ensure only the current owner of the land can perform certain actions ---
-    modifier onlyLandOwner(uint _landId) {
-        require(landRecords[_landId].owner != address(0), "Land does not exist.");
-        require(landRecords[_landId].owner == msg.sender, "Only the current owner can perform this action.");
-        _;
-    }
+    // --- REMOVED: The onlyLandOwner modifier is not used for transferOwnership in this model ---
+    // modifier onlyLandOwner(uint _landId) {
+    //     require(landRecords[_landId].owner != address(0), "Land does not exist.");
+    //     require(landRecords[_landId].owner == msg.sender, "Only the current owner can perform this action.");
+    //     _;
+    // }
 
     /**
      * @dev Registers a new land parcel by storing its proof (hash) on the blockchain.
@@ -81,14 +81,15 @@ contract LandRegistry {
 
     /**
      * @dev Transfers ownership of a registered land parcel.
-     * Only the current owner of the land can initiate the transfer.
+     * Only the Government Authority can initiate the transfer.
      * @param _landId The unique ID of the land parcel to transfer.
      * @param _newOwner The wallet address of the new owner.
      */
     function transferOwnership(uint _landId, address _newOwner)
         public
-        onlyLandOwner(_landId) // Only current owner can call this
+        onlyGovernment // <-- Ab sirf Government Authority hi call kar sakta hai
     {
+        require(landRecords[_landId].owner != address(0), "Land with this ID does not exist."); // Ensure land exists
         require(_newOwner != address(0), "New owner address cannot be zero.");
         require(_newOwner != landRecords[_landId].owner, "New owner cannot be the current owner.");
 

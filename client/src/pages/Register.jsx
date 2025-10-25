@@ -1,82 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import LandRegistryABI from '../LandRegistry.json'; // Import ABI
 
-const Register = ({ contract }) => {
-    // Form state variables
+// Receive provider and signer
+const Register = ({ contract, connectedAccount, provider, signer }) => { 
     const [ownerName, setOwnerName] = useState("");
     const [khasraNo, setKhasraNo] = useState("");
-    const [ownerWalletAddress, setOwnerWalletAddress] = useState("");
+    const [ownerWalletAddress, setOwnerWalletAddress] = useState(""); 
     const [propertyAddress, setPropertyAddress] = useState("");
     const [landArea, setLandArea] = useState("");
     const [propertyValue, setPropertyValue] = useState("");
     const [previousOwnerName, setPreviousOwnerName] = useState("");
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        if (connectedAccount) {
+            setOwnerWalletAddress(connectedAccount);
+        }
+    }, [connectedAccount]);
+
     const handleRegisterLand = async (e) => {
         e.preventDefault();
-        if (!contract) {
-            alert("Blockchain contract is not connected yet. Please wait or refresh the page.");
+        if (!provider || !signer || !contract || !contract.target) {
+            alert("Blockchain connection is not fully established.");
             return;
         }
+
+        // --- FIX: Create a new contract instance with ENS disabled explicitly ---
+        const contractInstance = new ethers.Contract(
+            contract.target,
+            LandRegistryABI.abi,
+            signer
+        );
+
         setLoading(true);
 
-        let mongoRecordId = null; // Variable to store the ID from MongoDB
-
         try {
-            // === Step 1: Save full details to the Off-Chain Database (MongoDB) ===
-            const landDetails = { 
-                ownerName, 
-                khasraNo, 
-                ownerWalletAddress, 
-                propertyAddress, 
-                landArea, 
-                propertyValue, 
-                previousOwnerName 
-            };
-            
-            console.log("Step 1: Sending data to off-chain server...", landDetails);
-            const offChainResponse = await fetch("http://localhost:5000/register-land", {
+            // Step 1: Save data to MongoDB off-chain
+            console.log("Saving data to off-chain database...");
+            const offChainResponse = await fetch('http://localhost:5000/register-land', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(landDetails)
+                body: JSON.stringify({ 
+                    ownerName, khasraNo, ownerWalletAddress, propertyAddress, 
+                    landArea, propertyValue: Number(propertyValue), previousOwnerName 
+                })
             });
-            
+
             const offChainData = await offChainResponse.json();
             if (!offChainResponse.ok) {
-                throw new Error(offChainData.message || "Failed to save data to MongoDB.");
+                throw new Error(offChainData.message || "Failed to save off-chain data.");
             }
-            mongoRecordId = offChainData.data._id; // Get the unique ID of the new record from MongoDB
-            console.log("Step 1 Success: Data saved to MongoDB with ID:", mongoRecordId);
+            const mongoRecordId = offChainData.data._id;
+            console.log("Off-chain data saved. MongoDB ID:", mongoRecordId);
 
-            // === Step 2: Register a proof (Hash) on the On-Chain Smart Contract ===
-            console.log("Step 2: Creating hash and sending to blockchain...");
-            const dataToHash = `${ownerName},${khasraNo},${propertyAddress},${landArea}`;
+            // Step 2: Calculate data hash for on-chain proof
+            // The hash includes sensitive data for integrity, but not on-chain itself
+            const dataToHash = `${ownerName}-${khasraNo}-${propertyValue}-${previousOwnerName}`;
             const dataHash = ethers.keccak256(ethers.toUtf8Bytes(dataToHash));
-            
-            const transaction = await contract.registerLand(ownerWalletAddress, dataHash, propertyAddress, landArea);
-            const receipt = await transaction.wait(); // Wait for the transaction to be mined
-            
-            // Find the event in the transaction receipt to get the new landId
-            const registeredEvent = receipt.logs.find(log => log.eventName === 'LandRegistered');
-            const onChainId = registeredEvent.args.landId;
-            console.log("Step 2 Success: Proof registered on-chain with ID:", Number(onChainId));
+            console.log("Data Hash generated:", dataHash);
 
-            // === Step 3: Link the On-Chain ID back to the Off-Chain Database ===
-            console.log("Step 3: Linking on-chain ID back to MongoDB record...");
+            // Step 3: Register land on-chain
+            console.log("Registering land on-chain...");
+            // Use the new contract instance
+            const transaction = await contractInstance.registerLand(
+                ownerWalletAddress,
+                dataHash,
+                propertyAddress,
+                landArea
+            );
+            const receipt = await transaction.wait(); // Wait for the transaction to be mined
+
+            // Find the LandRegistered event to get the onChainId
+            const registerEvent = receipt.logs.find(log => log.eventName === 'LandRegistered');
+            if (!registerEvent) {
+                throw new Error("LandRegistered event not found. Land may not have been registered on-chain.");
+            }
+            const onChainId = registerEvent.args.landId;
+            console.log(`On-chain registration successful! Land ID: ${Number(onChainId)}`);
+
+            // Step 4: Update MongoDB with onChainId
+            console.log("Updating off-chain record with on-chain ID...");
             const updateResponse = await fetch(`http://localhost:5000/update-onchain-id/${mongoRecordId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ onChainId: Number(onChainId) })
             });
-            if (!updateResponse.ok) {
-                throw new Error("Failed to link on-chain ID in MongoDB.");
-            }
-            console.log("Step 3 Success: On-chain ID linked in MongoDB!");
 
-            alert("Process Complete! Land data saved and linked with on-chain proof successfully!");
+            if (!updateResponse.ok) {
+                throw new Error("Failed to link on-chain ID to off-chain record.");
+            }
+            console.log("On-chain ID linked to MongoDB record.");
+
+            alert("Process Complete! Land registered and linked.");
+            // Clear form fields
+            setOwnerName(""); setKhasraNo(""); setOwnerWalletAddress("");
+            setPropertyAddress(""); setLandArea(""); setPropertyValue("");
+            setPreviousOwnerName("");
 
         } catch (error) {
-            console.error("The entire registration process failed:", error);
+            console.error("Land registration failed:", error);
             alert(`Error: ${error.message}`);
         } finally {
             setLoading(false);

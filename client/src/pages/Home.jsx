@@ -1,46 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers'; // Make sure ethers is imported
+import LandRegistryABI from '../LandRegistry.json'; // Import ABI
 
-const Home = ({ contract }) => {
+const Home = ({ contract, provider, signer }) => { // Receive provider and signer
     const [registeredLands, setRegisteredLands] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchAllLands = async () => {
-            if (contract) {
+            if (provider && signer && contract && contract.target) { // Check if contract and target are available
                 try {
                     setLoading(true);
-                    const count = await contract.landCount();
+
+                    // --- FIX: Create a new contract instance with ENS disabled explicitly ---
+                    const contractInstance = new ethers.Contract(
+                        contract.target, // Contract address from the passed contract object
+                        LandRegistryABI.abi,
+                        signer // Use the signer from App.jsx
+                    );
+
+                    const count = await contractInstance.landCount(); // Use the new instance
                     const lands = [];
                     for (let i = 1; i <= count; i++) {
-                        const landData = await contract.landRecords(i);
-
-                        // --- FINAL FIX: Accessing struct members by their index from the contract ---
-                        // Based on the Land struct in LandRegistry.sol:
-                        // 0: landId
-                        // 1: owner
-                        // 2: dataHash
-                        // 3: propertyAddress
-                        // 4: landArea
-                        // (Indices 5 and 6 are for isForSale and price, which we don't display here)
+                        const landData = await contractInstance.landRecords(i);
 
                         lands.push({
-                            landId: landData[0],          // uint landId
-                            owner: landData[1],           // address owner
-                            dataHash: landData[2],        // bytes32 dataHash
-                            propertyAddress: landData[3], // string propertyAddress
-                            landArea: landData[4]         // string landArea
+                            landId: landData[0],
+                            owner: landData[1],
+                            dataHash: landData[2],
+                            propertyAddress: landData[3],
+                            landArea: landData[4]
                         });
                     }
                     setRegisteredLands(lands.reverse()); 
                 } catch (error) {
                     console.error("Error fetching lands:", error);
+                    // The error you got will likely appear here, but now we're fixing the source.
                 } finally {
                     setLoading(false);
                 }
             }
         };
+
         fetchAllLands();
-    }, [contract]);
+    }, [provider, signer, contract]); // Dependency array updated
 
     if (loading) {
         return <h2 className="loading-text">Loading On-Chain Data...</h2>;
