@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import LandRegistryABI from '../LandRegistry.json'; // Import ABI
+// LandRegistryABI is not directly needed here if 'contract' prop is a full contract instance
+// import LandRegistryABI from '../LandRegistry.json'; 
 
-// Receive provider and signer
-const Register = ({ contract, connectedAccount, provider, signer }) => { 
+// Only receive 'contract' and 'connectedAccount' props
+const Register = ({ contract, connectedAccount }) => { 
     const [ownerName, setOwnerName] = useState("");
     const [khasraNo, setKhasraNo] = useState("");
     const [ownerWalletAddress, setOwnerWalletAddress] = useState(""); 
@@ -13,25 +14,34 @@ const Register = ({ contract, connectedAccount, provider, signer }) => {
     const [previousOwnerName, setPreviousOwnerName] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // This ensures ownerWalletAddress is pre-filled with the connected account
     useEffect(() => {
         if (connectedAccount) {
             setOwnerWalletAddress(connectedAccount);
+        } else {
+            setOwnerWalletAddress(""); // Clear if disconnected
         }
     }, [connectedAccount]);
 
     const handleRegisterLand = async (e) => {
         e.preventDefault();
-        if (!provider || !signer || !contract || !contract.target) {
-            alert("Blockchain connection is not fully established.");
+        // --- Validation check 'contract' prop par ---
+        if (!contract) { 
+            alert("Blockchain contract is not ready.");
+            console.error("handleRegisterLand: contract prop is null.");
             return;
         }
 
-        // --- FIX: Create a new contract instance with ENS disabled explicitly ---
-        const contractInstance = new ethers.Contract(
-            contract.target,
-            LandRegistryABI.abi,
-            signer
-        );
+        // --- Frontend specific validation for Government Authority ---
+        // (Assuming you have `governmentAuthorityAddress` state or can fetch it here)
+        // Agar aap chahte hain ki sirf GA hi register kar sake, to yahan fetch karein ya App.jsx se pass karein
+        // Temporary, for testing, assume connectedAccount is GA
+        // Yahan aapko governmentAuthorityAddress state ki zaroorat padegi
+        // Agar App.jsx se governmentAuthorityAddress pass kiya ja raha hai, to usko use karein
+        // Else, contract se fetch karein (but that could also trigger RPC error)
+
+        // For now, let's proceed assuming the connectedAccount is authorized to call registerLand
+        // (registerLand function has onlyGovernment modifier)
 
         setLoading(true);
 
@@ -55,15 +65,14 @@ const Register = ({ contract, connectedAccount, provider, signer }) => {
             console.log("Off-chain data saved. MongoDB ID:", mongoRecordId);
 
             // Step 2: Calculate data hash for on-chain proof
-            // The hash includes sensitive data for integrity, but not on-chain itself
             const dataToHash = `${ownerName}-${khasraNo}-${propertyValue}-${previousOwnerName}`;
             const dataHash = ethers.keccak256(ethers.toUtf8Bytes(dataToHash));
             console.log("Data Hash generated:", dataHash);
 
             // Step 3: Register land on-chain
             console.log("Registering land on-chain...");
-            // Use the new contract instance
-            const transaction = await contractInstance.registerLand(
+            // Use the 'contract' prop directly
+            const transaction = await contract.registerLand(
                 ownerWalletAddress,
                 dataHash,
                 propertyAddress,
