@@ -85,10 +85,14 @@ app.get('/land-by-onchain-id/:onChainId', async (req, res) => {
     }
 });
 
-// --- NEW: 4. Route to update land owner details after on-chain transfer ---
+// --- UPDATED: 4. Route to update land owner details after on-chain transfer ---
 app.patch('/update-land-owner/:mongoRecordId', async (req, res) => {
     try {
-        const { newOwnerWalletAddress } = req.body; // Wallet address of the new owner
+        const { newOwnerWalletAddress, newOwnerName } = req.body; // <-- newOwnerName ko yahan extract kar rahe hain
+
+        if (!newOwnerWalletAddress || !newOwnerName) { // Don't forget newOwnerName validation
+            return res.status(400).json({ message: 'New owner wallet address and name are required.' });
+        }
 
         // Fetch the old land record to get current owner's name and previous owner's name
         const oldLandRecord = await Land.findById(req.params.mongoRecordId);
@@ -100,14 +104,11 @@ app.patch('/update-land-owner/:mongoRecordId', async (req, res) => {
         const previousOwnerNameForUpdate = oldLandRecord.ownerName; 
         
         // Find the land by its MongoDB _id and update its owner details
-        // Note: For simplicity, we are not asking for 'newOwnerName' from frontend here.
-        // In a real app, you'd either fetch the new owner's name based on wallet,
-        // or prompt the government authority to enter it.
         const updatedLand = await Land.findByIdAndUpdate(
             req.params.mongoRecordId,
             {
                 ownerWalletAddress: newOwnerWalletAddress,
-                ownerName: "Updated - Please input new name", // Placeholder, requires manual update or lookup
+                ownerName: newOwnerName, // <-- Yahan naye owner ka naam set kar rahe hain
                 previousOwnerName: previousOwnerNameForUpdate, 
             },
             { new: true } // Return the updated document
