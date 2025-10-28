@@ -1,47 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-// LandRegistryABI is not directly needed here if 'contract' prop is a full contract instance
-// import LandRegistryABI from '../LandRegistry.json'; 
 
-// Only receive 'contract' and 'connectedAccount' props
 const Register = ({ contract, connectedAccount }) => { 
     const [ownerName, setOwnerName] = useState("");
     const [khasraNo, setKhasraNo] = useState("");
-    const [ownerWalletAddress, setOwnerWalletAddress] = useState(""); 
+    const [ownerWalletAddress, setOwnerWalletAddress] = useState(""); // This will be the NEW owner's address
     const [propertyAddress, setPropertyAddress] = useState("");
     const [landArea, setLandArea] = useState("");
     const [propertyValue, setPropertyValue] = useState("");
     const [previousOwnerName, setPreviousOwnerName] = useState("");
     const [loading, setLoading] = useState(false);
+    const [governmentAuthorityAddress, setGovernmentAuthorityAddress] = useState(null); // New state to hold GA address
 
-    // This ensures ownerWalletAddress is pre-filled with the connected account
+    // Fetch government authority address on component mount
     useEffect(() => {
-        if (connectedAccount) {
-            setOwnerWalletAddress(connectedAccount);
-        } else {
-            setOwnerWalletAddress(""); // Clear if disconnected
-        }
-    }, [connectedAccount]);
+        const fetchGovernmentAuthority = async () => {
+            if (contract) {
+                try {
+                    const govAddress = await contract.governmentAuthority();
+                    setGovernmentAuthorityAddress(govAddress);
+                } catch (error) {
+                    console.error("Error fetching government authority:", error);
+                }
+            }
+        };
+        fetchGovernmentAuthority();
+    }, [contract]);
+
+    // This useEffect is now REMOVED as we don't want to pre-fill ownerWalletAddress with connectedAccount (GA)
+    // useEffect(() => {
+    //     if (connectedAccount) {
+    //         setOwnerWalletAddress(connectedAccount);
+    //     } else {
+    //         setOwnerWalletAddress("");
+    //     }
+    // }, [connectedAccount]);
 
     const handleRegisterLand = async (e) => {
         e.preventDefault();
-        // --- Validation check 'contract' prop par ---
+        
         if (!contract) { 
             alert("Blockchain contract is not ready.");
             console.error("handleRegisterLand: contract prop is null.");
             return;
         }
-
-        // --- Frontend specific validation for Government Authority ---
-        // (Assuming you have `governmentAuthorityAddress` state or can fetch it here)
-        // Agar aap chahte hain ki sirf GA hi register kar sake, to yahan fetch karein ya App.jsx se pass karein
-        // Temporary, for testing, assume connectedAccount is GA
-        // Yahan aapko governmentAuthorityAddress state ki zaroorat padegi
-        // Agar App.jsx se governmentAuthorityAddress pass kiya ja raha hai, to usko use karein
-        // Else, contract se fetch karein (but that could also trigger RPC error)
-
-        // For now, let's proceed assuming the connectedAccount is authorized to call registerLand
-        // (registerLand function has onlyGovernment modifier)
+        if (!connectedAccount || connectedAccount.toLowerCase() !== governmentAuthorityAddress.toLowerCase()) {
+            alert("Only the Government Authority can register new land. Please connect with the Government Authority's wallet.");
+            return;
+        }
+        if (!ethers.isAddress(ownerWalletAddress) || ownerWalletAddress === ethers.ZeroAddress) {
+            alert("Please enter a valid wallet address for the new owner.");
+            return;
+        }
 
         setLoading(true);
 
@@ -73,14 +83,13 @@ const Register = ({ contract, connectedAccount }) => {
             console.log("Registering land on-chain...");
             // Use the 'contract' prop directly
             const transaction = await contract.registerLand(
-                ownerWalletAddress,
+                ownerWalletAddress, // <-- Ab yeh field se liya gaya address hai
                 dataHash,
                 propertyAddress,
                 landArea
             );
             const receipt = await transaction.wait(); // Wait for the transaction to be mined
 
-            // Find the LandRegistered event to get the onChainId
             const registerEvent = receipt.logs.find(log => log.eventName === 'LandRegistered');
             if (!registerEvent) {
                 throw new Error("LandRegistered event not found. Land may not have been registered on-chain.");
@@ -118,10 +127,24 @@ const Register = ({ contract, connectedAccount }) => {
     return (
         <div className="form-container">
             <h2>Register Land Details</h2>
+            {governmentAuthorityAddress && (
+                <p className="info-text">
+                    Connected as Government Authority: <span className="highlight-address">{governmentAuthorityAddress}</span>
+                </p>
+            )}
             <form onSubmit={handleRegisterLand}>
                 <input type="text" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="Owner's Full Name" required />
                 <input type="text" value={khasraNo} onChange={(e) => setKhasraNo(e.target.value)} placeholder="Khasra Number (e.g., KH-123)" required />
-                <input type="text" value={ownerWalletAddress} onChange={(e) => setOwnerWalletAddress(e.target.value)} placeholder="Owner's Wallet Address" required />
+                
+                {/* This input field is now for the actual new owner, NOT the connected account */}
+                <input 
+                    type="text" 
+                    value={ownerWalletAddress} 
+                    onChange={(e) => setOwnerWalletAddress(e.target.value)} 
+                    placeholder="New Owner's Wallet Address" 
+                    required 
+                />
+
                 <input type="text" value={propertyAddress} onChange={(e) => setPropertyAddress(e.target.value)} placeholder="Physical Property Address" required />
                 <input type="text" value={landArea} onChange={(e) => setLandArea(e.target.value)} placeholder="Land Area (e.g., 2000 sqft)" required />
                 <input type="number" value={propertyValue} onChange={(e) => setPropertyValue(e.target.value)} placeholder="Property Value (in INR)" required />
