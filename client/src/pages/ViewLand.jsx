@@ -239,6 +239,7 @@ const ViewLand = ({ contract }) => {
                                 {selectedLandDetails.transferDate && (
                                     <p><strong>Associated Date:</strong> {new Date(selectedLandDetails.transferDate).toLocaleDateString()}</p>
                                 )}
+                                
                             </div>
                         ) : (
                             <p className="no-details-message">Click on an owner card to view full details.</p>
