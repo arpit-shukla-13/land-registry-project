@@ -141,3 +141,126 @@ tbody tr:hover {
     color: #777;
     padding: 40px;
 }
+
+/* client/src/App.css */
+/* Existing styles */
+.form-container {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.form-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form-container input[type="text"],
+.form-container input[type="number"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-container button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.form-container button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.info-text {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.highlight-address {
+    font-weight: bold;
+    color: #007bff; /* Blue color for addresses */
+    word-break: break-all; /* Helps with long addresses */
+}
+
+.highlight-text {
+    font-weight: bold;
+    color: #28a745; /* Green color for names/values */
+}
+
+.highlight-hash {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8em;
+    word-break: break-all;
+    color: #6f42c1; /* Purple for hashes */
+}
+
+.error-text {
+    color: #dc3545; /* Red for errors */
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* New styles for ViewLand component */
+.land-details-card {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.land-details-card h3 {
+    color: #0056b3;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.land-details-card p {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.land-details-card strong {
+    color: #333;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px; /* Space between input and button */
+}
+
+.input-group input {
+    flex-grow: 1; /* Input takes available space */
+    margin-bottom: 0; /* Override default margin */
+}
+
+.input-group button {
+    width: auto; /* Button width adjusts to content */
+    padding: 10px 20px;
+    margin-bottom: 0; /* Override default margin */
+}
