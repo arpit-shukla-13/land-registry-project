@@ -1,70 +1,81 @@
 /* client/src/App.css */
 
 .App {
-  max-width: 1000px;
+  max-width: 1200px; /* Wider for side-by-side view */
   margin: 30px auto;
-  padding: 20px;
-  background-color: #FFFFFF;
+  padding: 25px;
+  background-color: var(--background-medium); /* Use background-medium */
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* Darker shadow */
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
 }
 
 .App h1 {
   text-align: center;
   color: var(--primary-color);
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   font-weight: 700;
-  font-size: 2.2em;
+  font-size: 2.5em;
+  letter-spacing: 1px;
 }
 
 .App p {
   text-align: center;
-  font-size: 0.95em;
+  font-size: 1em;
   color: var(--text-color-light);
 }
 
 .App hr {
   border: none;
   border-top: 1px solid var(--border-color);
-  margin: 20px 0;
+  margin: 25px 0;
 }
 
 .connect-button {
   background-color: var(--primary-color);
   color: white;
-  display: block; /* Make it block level */
-  margin: 0 auto; /* Center the button */
-  width: fit-content; /* Adjust width to content */
+  display: block;
+  margin: 0 auto;
+  width: fit-content;
+  padding: 12px 25px;
+  font-size: 1.1em;
+  font-weight: 600;
 }
 
 .connect-button:hover:not(:disabled) {
-  background-color: #3a7bd2; /* Slightly darker primary */
+  background-color: #836AE7; /* Slightly lighter primary */
 }
 
 /* --- Navigation Styles --- */
 nav {
   display: flex;
   justify-content: center;
-  gap: 25px;
-  margin-top: 15px;
+  gap: 30px;
+  margin-top: 20px;
 }
 
 nav a {
   color: var(--text-color-dark);
   font-weight: 500;
-  padding: 8px 15px;
+  padding: 10px 20px;
   border-radius: 8px;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  text-decoration: none; /* Remove underline by default */
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  background-color: var(--background-lightest); /* Nav item background */
 }
 
 nav a:hover {
-  background-color: var(--background-medium);
-  color: var(--primary-color);
-  text-decoration: none; /* Keep no underline on hover */
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+  text-decoration: none;
+}
+nav a.active-link { /* For future active link styling */
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
 }
 
 /* --- Form Container (Used by Register, Transfer, ViewLand) --- */
@@ -72,84 +83,96 @@ nav a:hover {
   padding: 30px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  background-color: var(--background-light);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-  margin-top: 20px; /* Space from App header */
+  background-color: var(--background-medium); /* Consistent background */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  margin-top: 20px;
 }
 
 .form-container h2 {
   text-align: center;
   color: var(--text-color-dark);
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   font-weight: 600;
-  font-size: 1.8em;
+  font-size: 2em;
 }
 
 .form-container form {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Space between form elements */
+  gap: 18px; /* More space */
 }
 
 .form-container input[type="text"],
 .form-container input[type="number"] {
-  width: 100%; /* Full width for inputs */
+  width: 100%;
 }
 
 .form-container button[type="submit"] {
   background-color: var(--primary-color);
   color: white;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 /* --- Info and Error Texts --- */
 .info-text {
-  font-size: 0.9em;
+  font-size: 0.95em;
   color: var(--text-color-light);
-  margin-bottom: 10px;
-  background-color: var(--background-medium);
-  padding: 8px 12px;
-  border-radius: 6px;
+  margin-bottom: 12px;
+  background-color: var(--background-lightest); /* Lighter for info boxes */
+  padding: 10px 15px;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
-  word-wrap: break-word; /* For long addresses */
+  word-wrap: break-word;
 }
 
 .error-text {
   color: var(--error-color);
   font-weight: 500;
-  margin-top: 15px;
+  margin-top: 20px;
   text-align: center;
-  background-color: rgba(208, 2, 27, 0.1); /* Light red background */
-  padding: 10px 15px;
-  border-radius: 6px;
+  background-color: rgba(234, 32, 39, 0.15); /* Light red background */
+  padding: 12px 18px;
+  border-radius: 8px;
 }
 
 .highlight-address {
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--secondary-color); /* Teal for addresses */
   word-break: break-all;
 }
 
 .highlight-text {
   font-weight: 600;
-  color: var(--text-color-dark); /* Changed to dark text for general highlights */
+  color: var(--accent-color); /* Soft red for highlighted names/values */
 }
 
 .highlight-hash {
-  font-family: 'Roboto Mono', monospace; /* Monospace font for hash */
-  font-size: 0.85em;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.88em;
   word-break: break-all;
-  color: var(--secondary-color); /* Mint green for hashes */
-  background-color: rgba(80, 227, 194, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
+  color: var(--text-color-dark); /* Darker text for hash on a subtle background */
+  background-color: rgba(0, 184, 148, 0.15); /* Teal tint */
+  padding: 3px 8px;
+  border-radius: 5px;
+  display: inline-block; /* To respect padding */
 }
 
-/* --- ViewLand Specific Styles --- */
+/* --- ViewLand Specific Styles (NEW & UPDATED) --- */
+.view-land-layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.view-land-layout > div {
+  flex: 1; /* Both sections take equal width */
+}
+
+/* Input group */
 .input-group {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px; /* Add margin to input group */
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
 .input-group input {
@@ -159,67 +182,193 @@ nav a:hover {
 
 .input-group button {
     width: auto;
-    padding: 10px 20px;
+    padding: 12px 25px;
     margin-bottom: 0;
     background-color: var(--primary-color);
     color: white;
 }
 
-.land-details-card {
-    background-color: #FFFFFF;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 25px;
-    margin-top: 25px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+/* Owner Timeline Box */
+.owner-timeline-section {
+  background-color: var(--background-medium);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  min-width: 300px; /* Minimum width for the timeline */
 }
 
-.land-details-card h3 {
-    color: var(--primary-color);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 12px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.5em;
+.owner-timeline-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 1.8em;
+  font-weight: 600;
 }
 
-.land-details-card p {
-    margin-bottom: 10px;
-    line-height: 1.6;
-    color: var(--text-color-light);
-    text-align: left; /* Override global p center alignment if any */
+.owner-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between owner boxes */
 }
 
-.land-details-card strong {
-    color: var(--text-color-dark);
+.owner-card {
+  background-color: var(--background-lightest); /* Lighter dark for cards */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  position: relative;
+  overflow: hidden; /* For pseudo-element glow */
 }
 
-/* Media Queries for Responsiveness (Basic) */
+.owner-card::before { /* Subtle glow on hover */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 0, var(--primary-color) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.owner-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.owner-card:hover::before {
+  opacity: 0.1;
+}
+
+.owner-card.active {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+  transform: translateY(-5px);
+}
+.owner-card.active .owner-card-title,
+.owner-card.active .owner-card-info {
+    color: white; /* Ensure text is white when active */
+}
+.owner-card.active .highlight-address {
+    color: var(--secondary-color); /* Teal for active address */
+}
+
+
+.owner-card-title {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: var(--primary-color); /* Title uses primary color */
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.owner-card-info {
+  font-size: 0.9em;
+  color: var(--text-color-light);
+  margin-bottom: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Full Details Card (Right Side) */
+.full-details-section {
+  background-color: var(--background-medium);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  min-height: 400px; /* Ensure it has some height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  text-align: center;
+}
+
+.full-details-card {
+  width: 100%; /* Take full width of its container */
+  /* Remove individual card styling, use section styling */
+}
+
+.full-details-card h3 {
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 1.8em;
+  text-align: center;
+}
+
+.full-details-card p {
+  margin-bottom: 10px;
+  line-height: 1.7;
+  color: var(--text-color-light);
+  text-align: left; /* Align text left within details card */
+}
+
+.full-details-card strong {
+  color: var(--text-color-dark);
+}
+
+.no-details-message {
+  font-size: 1.2em;
+  color: var(--text-color-light);
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 992px) {
+  .view-land-layout {
+    flex-direction: column; /* Stack columns on smaller screens */
+  }
+  .owner-timeline-section, .full-details-section {
+    min-width: unset; /* Remove min-width when stacked */
+  }
+}
+
 @media (max-width: 768px) {
   .App {
     margin: 20px 10px;
-    padding: 15px;
+    padding: 20px;
+    gap: 20px;
+  }
+  .App h1 {
+    font-size: 2em;
   }
   nav {
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
   }
   nav a {
-    padding: 6px 10px;
+    padding: 8px 15px;
     font-size: 0.9em;
   }
-  .form-container {
+  .form-container, .owner-timeline-section, .full-details-section {
     padding: 20px;
   }
   .form-container h2 {
-    font-size: 1.5em;
+    font-size: 1.6em;
   }
   .input-group {
     flex-direction: column;
+    gap: 10px;
   }
   .input-group button {
     width: 100%;
+  }
+  .owner-card-title {
+    font-size: 1.1em;
+  }
+  .owner-card-info {
+    font-size: 0.85em;
+  }
+  .full-details-card h3 {
+    font-size: 1.5em;
   }
 }
 
@@ -227,7 +376,13 @@ nav a:hover {
   .App h1 {
     font-size: 1.8em;
   }
-  .land-details-card h3 {
-    font-size: 1.2em;
+  .form-container h2 {
+    font-size: 1.4em;
+  }
+  .owner-timeline-section h3, .full-details-card h3 {
+    font-size: 1.3em;
+  }
+  .owner-card-wrapper {
+    gap: 15px;
   }
 }
