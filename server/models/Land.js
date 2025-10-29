@@ -1,20 +1,31 @@
+// server/models/Land.js
 const mongoose = require('mongoose');
 
-const LandSchema = new mongoose.Schema({
-    // Yeh saari details hum frontend se lenge
+const OwnershipRecordSchema = new mongoose.Schema({
     ownerName: { type: String, required: true },
-    khasraNo: { type: String, required: true, unique: true },
     ownerWalletAddress: { type: String, required: true },
+    transferDate: { type: Date, default: Date.now },
+    // You could also store a snapshot of other details like khasraNo, propertyAddress
+    // if you want the "view land at that historical point" functionality.
+    // For now, let's keep it simple with just name and address.
+});
+
+const LandSchema = new mongoose.Schema({
+    ownerName: { type: String, required: true }, // Current owner name
+    khasraNo: { type: String, required: true, unique: true },
+    ownerWalletAddress: { type: String, required: true }, // Current owner wallet address
     propertyAddress: { type: String, required: true },
     landArea: { type: String, required: true },
-
-    // Yeh naye, zaroori fields hain
     propertyValue: { type: Number, required: true },
-    previousOwnerName: { type: String, default: "N/A" }, // Nayi zameen ke liye yeh "N/A" hoga
+    onChainId: { type: Number, default: null },
+    registrationDate: { type: Date, default: Date.now },
 
-    // Yeh details server automatisch set karega
-    onChainId: { type: Number, default: null }, // Jab blockchain par register hoga, tab yeh ID yahan aayegi
-    registrationDate: { type: Date, default: Date.now }
+    // This array will store the chronological history of ALL owners
+    // The current owner is NOT in this array; their details are in the main fields.
+    ownershipHistory: {
+        type: [OwnershipRecordSchema],
+        default: []
+    }
 });
 
 module.exports = mongoose.model('Land', LandSchema);

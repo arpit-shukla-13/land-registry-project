@@ -1,37 +1,45 @@
+// server/index.js (FINAL UPDATED VERSION - Please use this one)
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-// Import the Land model
-const Land = require('./models/Land');
+const Land = require('./models/Land'); // Make sure to use the updated Land model
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // Middleware to parse JSON request bodies
+app.use(express.json());
 
 const MONGO_URI = process.env.MONGO_URI;
 
-// Connect to MongoDB
 mongoose.connect(MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB!"))
   .catch(err => console.error("MongoDB connection error:", err));
 
 // --- API Routes ---
 
-// 1. Route to register new land data
+// 1. Route to register new land data (UPDATED to initialize ownershipHistory)
 app.post('/register-land', async (req, res) => {
     try {
         console.log("Received data for registration:", req.body);
 
+        const { ownerName, khasraNo, ownerWalletAddress, propertyAddress, landArea, propertyValue } = req.body;
+
         const newLand = new Land({
-            ownerName: req.body.ownerName,
-            khasraNo: req.body.khasraNo,
-            ownerWalletAddress: req.body.ownerWalletAddress,
-            propertyAddress: req.body.propertyAddress,
-            landArea: req.body.landArea,
-            propertyValue: req.body.propertyValue, 
-            previousOwnerName: req.body.previousOwnerName || "N/A" 
+            ownerName,
+            khasraNo,
+            ownerWalletAddress,
+            propertyAddress,
+            landArea,
+            propertyValue,
+            registrationDate: new Date(), // Set registration date here
+            // Initialize ownershipHistory with the first owner
+            ownershipHistory: [{
+                ownerName: ownerName,
+                ownerWalletAddress: ownerWalletAddress,
+                transferDate: new Date() // The date of initial registration
+            }]
         });
 
         const savedLand = await newLand.save();
@@ -39,7 +47,6 @@ app.post('/register-land', async (req, res) => {
 
     } catch (error) {
         console.error("Error saving data:", error);
-        // E11000 is for duplicate key error (e.g., khasraNo)
         if (error.code === 11000) {
             return res.status(409).json({ message: "Khasra Number already exists.", error: error.message });
         }
@@ -47,7 +54,7 @@ app.post('/register-land', async (req, res) => {
     }
 });
 
-// 2. Route to update the onChainId for a land record after blockchain registration
+// 2. Route to update the onChainId for a land record after blockchain registration (NO CHANGE)
 app.patch('/update-onchain-id/:mongoId', async (req, res) => {
     try {
         const { mongoId } = req.params; 
@@ -56,7 +63,7 @@ app.patch('/update-onchain-id/:mongoId', async (req, res) => {
         const updatedLand = await Land.findByIdAndUpdate(
             mongoId,
             { onChainId: onChainId },
-            { new: true } // Return the updated document
+            { new: true }
         );
 
         if (!updatedLand) {
@@ -71,9 +78,11 @@ app.patch('/update-onchain-id/:mongoId', async (req, res) => {
     }
 });
 
-// --- NEW: 3. Route to get land details by onChainId (used by Transfer.jsx to get MongoDB _id) ---
+// 3. Route to get land details by onChainId (NO CHANGE)
 app.get('/land-by-onchain-id/:onChainId', async (req, res) => {
     try {
+        // We do not need to populate ownershipHistory here, just fetch the land record as is.
+        // The frontend will construct the full timeline from this data.
         const land = await Land.findOne({ onChainId: req.params.onChainId });
         if (!land) {
             return res.status(404).json({ message: 'Land not found in off-chain database.' });
@@ -85,40 +94,46 @@ app.get('/land-by-onchain-id/:onChainId', async (req, res) => {
     }
 });
 
-// --- UPDATED: 4. Route to update land owner details after on-chain transfer ---
+// 4. Route to update land owner details after on-chain transfer (UPDATED - CRITICAL FIX FOR HISTORY ORDER)
 app.patch('/update-land-owner/:mongoRecordId', async (req, res) => {
     try {
-        const { newOwnerWalletAddress, newOwnerName } = req.body; // <-- newOwnerName ko yahan extract kar rahe hain
+        const { newOwnerWalletAddress, newOwnerName } = req.body;
 
-        if (!newOwnerWalletAddress || !newOwnerName) { // Don't forget newOwnerName validation
+        if (!newOwnerWalletAddress || !newOwnerName) {
             return res.status(400).json({ message: 'New owner wallet address and name are required.' });
         }
 
-        // Fetch the old land record to get current owner's name and previous owner's name
-        const oldLandRecord = await Land.findById(req.params.mongoRecordId);
-        if (!oldLandRecord) {
+        const landRecord = await Land.findById(req.params.mongoRecordId);
+        if (!landRecord) {
             return res.status(404).json({ message: 'Off-chain land record not found.' });
         }
 
-        // The current owner's name becomes the previous owner's name
-        const previousOwnerNameForUpdate = oldLandRecord.ownerName; 
+        // The current owner's details are stored in the main fields (landRecord.ownerName, landRecord.ownerWalletAddress).
+        // Before we update these main fields with the new owner's details,
+        // we take the *current* owner's details and add them to the ownershipHistory array.
+        const previousOwnerEntry = {
+            ownerName: landRecord.ownerName,
+            ownerWalletAddress: landRecord.ownerWalletAddress,
+            transferDate: new Date() // The date of this transfer
+        };
         
-        // Find the land by its MongoDB _id and update its owner details
-        const updatedLand = await Land.findByIdAndUpdate(
-            req.params.mongoRecordId,
-            {
-                ownerWalletAddress: newOwnerWalletAddress,
-                ownerName: newOwnerName, // <-- Yahan naye owner ka naam set kar rahe hain
-                previousOwnerName: previousOwnerNameForUpdate, 
-            },
-            { new: true } // Return the updated document
-        );
+        // Push the previous owner to the end of the history array.
+        // This ensures the array is always in chronological order (oldest to newest).
+        landRecord.ownershipHistory.push(previousOwnerEntry); 
+
+        // Now, update the main fields to reflect the new owner
+        landRecord.ownerName = newOwnerName;
+        landRecord.ownerWalletAddress = newOwnerWalletAddress;
+        // Optionally, update registrationDate to reflect the new owner's acquisition date
+        landRecord.registrationDate = new Date(); // Or keep the original registrationDate for the land itself
+
+        const updatedLand = await landRecord.save(); 
 
         if (!updatedLand) {
             return res.status(404).json({ message: 'Off-chain land record not found or could not be updated.' });
         }
 
-        res.status(200).json({ message: 'Off-chain land owner updated successfully.', data: updatedLand });
+        res.status(200).json({ message: 'Off-chain land owner updated successfully and history recorded.', data: updatedLand });
     } catch (error) {
         console.error("Error updating off-chain land owner:", error);
         res.status(500).json({ message: 'Error updating off-chain land owner.', error: error.message });
