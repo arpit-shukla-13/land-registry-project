@@ -104,7 +104,7 @@ function App() {
           <Link to="/">Home</Link> | 
           <Link to="/register">Register New Land</Link> | 
           <Link to="/transfer">Transfer Ownership</Link> |
-          <Link to="/view-land">View Land</Link> {/* <-- Naya Link add karein */}
+          <Link to="/view-land">View Land</Link> 
         </nav>
         <hr />
 
