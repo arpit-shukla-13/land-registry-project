@@ -19,6 +19,7 @@ mongoose.connect(MONGO_URI)
 
 // --- API Routes ---
 
+
 // 1. Route to register new land data (UPDATED to initialize ownershipHistory)
 app.post('/register-land', async (req, res) => {
     try {
