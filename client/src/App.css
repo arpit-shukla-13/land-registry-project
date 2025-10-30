@@ -276,6 +276,7 @@ nav a.active-link { /* For future active link styling */
   z-index: 1;
 }
 
+
 /* Full Details Card (Right Side) */
 .full-details-section {
   background-color: var(--background-medium);
