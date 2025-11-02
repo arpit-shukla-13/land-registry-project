@@ -17,6 +17,7 @@ function App() {
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null); 
   const [signer, setSigner] = useState(null);
+  
 
   // --- IMPORTANT: Replace this with your LATEST deployed contract address ---
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
