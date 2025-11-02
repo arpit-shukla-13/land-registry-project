@@ -22,6 +22,7 @@ const LandSchema = new mongoose.Schema({
 
     // This array will store the chronological history of ALL owners
     // The current owner is NOT in this array; their details are in the main fields.
+    
     ownershipHistory: {
         type: [OwnershipRecordSchema],
         default: []
