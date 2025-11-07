@@ -24,6 +24,7 @@ const LandSchema = new mongoose.Schema({
     // The current owner is NOT in this array; their details are in the main fields.
     
     
+    
     ownershipHistory: {
         type: [OwnershipRecordSchema],
         default: []
