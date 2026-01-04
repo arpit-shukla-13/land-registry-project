@@ -85,4 +85,18 @@ input:focus, textarea:focus {
   box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3); /* Primary color with transparency */
 }
 
+/* Sabhi inputs aur textarea ke placeholder ka color change karne ke liye */
+input::placeholder, 
+textarea::placeholder {
+  color: white; /* Aapne jo variable banaya hai uska use */
+  opacity: 0.7; /* Thoda transparency dene ke liye */
+  font-size: 0.9rem;
+}
+
+/* Specific focus state par agar color change karna ho */
+input:focus::placeholder {
+  color: white;
+  opacity: 0.5;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap'); /* Add Roboto Mono for hashes */
