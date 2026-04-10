@@ -1,389 +1,447 @@
-/* client/src/App.css */
+/* client/src/App.css (UPDATED MODERN WEB3 THEME) */
 
+/* --- 1. GLOBAL THEME VARIABLES --- */
+:root {
+  /* Color Palette - Modern Dark & Futuristic */
+  --bg-dark: #0b0f19;          /* Deepest background */
+  --bg-card: #151b2b;          /* Main cards/containers */
+  --bg-input: #1e2638;         /* Input fields */
+  --bg-hover: rgba(59, 130, 246, 0.1); /* Subtle blue hover */
+  
+  --text-main: #f8fafc;        /* Primary Text */
+  --text-muted: #94a3b8;       /* Secondary/Muted Text */
+  --text-dark: #e2e8f0;        /* Slightly darker text */
+  
+  /* Brand/Accent Colors */
+  --primary-color: #3b82f6;    /* Bright Blue */
+  --primary-gradient: linear-gradient(135deg, #3b82f6, #0ea5e9);
+  --secondary-color: #00f2fe;  /* Cyan/Teal for highlights */
+  --accent-color: #f43f5e;     /* Rose red for specific highlights */
+  --error-color: #ef4444;      /* Red for errors */
+  --success-color: #10b981;    /* Green for success */
+  
+  /* Borders & Shadows */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+/* --- 2. BASE STYLES --- */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* --- 3. MAIN APP LAYOUT --- */
 .App {
-  max-width: 1200px; /* Wider for side-by-side view */
-  margin: 30px auto;
-  padding: 25px;
-  background-color: var(--background-medium); /* Use background-medium */
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* Darker shadow */
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 30px;
 }
 
 .App h1 {
   text-align: center;
-  color: var(--primary-color);
-  margin-bottom: 15px;
-  font-weight: 700;
-  font-size: 2.5em;
-  letter-spacing: 1px;
+  margin: 0;
+  font-weight: 800;
+  font-size: 2.8em;
+  letter-spacing: -1px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.App p {
+.App > p {
   text-align: center;
-  font-size: 1em;
-  color: var(--text-color-light);
+  font-size: 1.1em;
+  color: var(--text-muted);
+  margin-top: -15px;
 }
 
 .App hr {
   border: none;
   border-top: 1px solid var(--border-color);
-  margin: 25px 0;
+  margin: 10px 0;
 }
 
-.connect-button {
-  background-color: var(--primary-color);
-  color: white;
-  display: block;
-  margin: 0 auto;
-  width: fit-content;
-  padding: 12px 25px;
-  font-size: 1.1em;
-  font-weight: 600;
-}
-
-.connect-button:hover:not(:disabled) {
-  background-color: #836AE7; /* Slightly lighter primary */
-}
-
-/* --- Navigation Styles --- */
+/* --- 4. NAVIGATION --- */
 nav {
   display: flex;
   justify-content: center;
-  gap: 30px;
-  margin-top: 20px;
+  gap: 15px;
+  margin: 10px 0;
+  flex-wrap: wrap;
 }
 
 nav a {
-  color: var(--text-color-dark);
-  font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 12px;
   text-decoration: none;
-  background-color: var(--background-lightest); /* Nav item background */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  font-size: 0.95em;
+  letter-spacing: 0.5px;
 }
 
 nav a:hover {
-  background-color: var(--primary-color);
+  background: var(--primary-gradient);
   color: white;
-  box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
-  text-decoration: none;
-}
-nav a.active-link { /* For future active link styling */
-  background-color: var(--primary-color);
-  color: white;
-  box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
 }
 
-/* --- Form Container (Used by Register, Transfer, ViewLand) --- */
-.form-container {
-  padding: 30px;
-  border: 1px solid var(--border-color);
+nav a.active-link {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+  box-shadow: var(--shadow-glow);
+}
+
+/* --- 5. GLOBAL BUTTONS --- */
+.connect-button, button[type="submit"], .input-group button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 14px 28px;
   border-radius: 10px;
-  background-color: var(--background-medium); /* Consistent background */
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  margin-top: 20px;
+  font-size: 1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-glow);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.form-container h2 {
+.connect-button {
+  display: block;
+  margin: 0 auto;
+}
+
+.connect-button:hover:not(:disabled), button[type="submit"]:hover:not(:disabled), .input-group button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* --- 6. SHARED CONTAINERS & FORMS --- */
+.form-container, .lands-container {
+  padding: 40px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: var(--shadow-main);
+}
+
+.form-container h2, .lands-container h2 {
   text-align: center;
-  color: var(--text-color-dark);
+  color: var(--text-main);
   margin-bottom: 30px;
-  font-weight: 600;
-  font-size: 2em;
+  font-weight: 700;
+  font-size: 2.2em;
+  letter-spacing: -0.5px;
 }
 
 .form-container form {
   display: flex;
   flex-direction: column;
-  gap: 18px; /* More space */
+  gap: 20px;
 }
 
-.form-container input[type="text"],
-.form-container input[type="number"] {
+input[type="text"], input[type="number"], textarea {
   width: 100%;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 1em;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
-.form-container button[type="submit"] {
-  background-color: var(--primary-color);
-  color: white;
-  margin-top: 15px;
+input:focus, textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--border-focus);
 }
 
-/* --- Info and Error Texts --- */
+/* --- 7. TABLES (Home Page) --- */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  background-color: var(--bg-input);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+th {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-muted);
+  text-align: left;
+  padding: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 1px;
+}
+
+td {
+  padding: 18px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-dark);
+  font-size: 0.95em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background-color: var(--bg-hover);
+}
+
+.no-data-text {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+  font-size: 1.2em;
+  background: var(--bg-input);
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+}
+
+.loading-text {
+  text-align: center;
+  color: var(--primary-color);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* --- 8. TYPOGRAPHY UTILITIES --- */
 .info-text {
   font-size: 0.95em;
-  color: var(--text-color-light);
-  margin-bottom: 12px;
-  background-color: var(--background-lightest); /* Lighter for info boxes */
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  word-wrap: break-word;
+  color: var(--secondary-color);
+  background-color: rgba(0, 242, 254, 0.05);
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .error-text {
   color: var(--error-color);
-  font-weight: 500;
-  margin-top: 20px;
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
   text-align: center;
-  background-color: rgba(234, 32, 39, 0.15); /* Light red background */
-  padding: 12px 18px;
-  border-radius: 8px;
+  margin-top: 15px;
 }
 
 .highlight-address {
-  font-weight: 600;
-  color: var(--secondary-color); /* Teal for addresses */
+  font-family: 'Fira Code', monospace;
+  color: var(--secondary-color);
   word-break: break-all;
 }
 
 .highlight-text {
   font-weight: 600;
-  color: var(--accent-color); /* Soft red for highlighted names/values */
+  color: var(--text-main);
 }
 
 .highlight-hash {
-  font-family: 'Roboto Mono', monospace;
-  font-size: 0.88em;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85em;
+  color: var(--primary-color);
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  display: inline-block;
   word-break: break-all;
-  color: var(--text-color-dark); /* Darker text for hash on a subtle background */
-  background-color: rgba(0, 184, 148, 0.15); /* Teal tint */
-  padding: 3px 8px;
-  border-radius: 5px;
-  display: inline-block; /* To respect padding */
 }
 
-/* --- ViewLand Specific Styles (NEW & UPDATED) --- */
+/* --- 9. VIEW LAND SPECIFIC STYLES --- */
 .view-land-layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: 350px 1fr;
   gap: 30px;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
-.view-land-layout > div {
-  flex: 1; /* Both sections take equal width */
-}
-
-/* Input group */
 .input-group {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
+  display: flex;
+  gap: 15px;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
 }
 
 .input-group input {
-    flex-grow: 1;
-    margin-bottom: 0;
+  flex: 1;
 }
 
-.input-group button {
-    width: auto;
-    padding: 12px 25px;
-    margin-bottom: 0;
-    background-color: var(--primary-color);
-    color: white;
-}
-
-/* Owner Timeline Box */
+/* Timeline Left Panel */
 .owner-timeline-section {
-  background-color: var(--background-medium);
+  background-color: var(--bg-card);
   padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  min-width: 300px; /* Minimum width for the timeline */
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  max-height: 800px;
+  overflow-y: auto;
 }
 
 .owner-timeline-section h3 {
-  color: var(--primary-color);
+  color: var(--text-main);
+  margin-top: 0;
   margin-bottom: 25px;
-  text-align: center;
-  font-size: 1.8em;
-  font-weight: 600;
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
 }
 
 .owner-card-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Space between owner boxes */
+  gap: 15px;
 }
 
 .owner-card {
-  background-color: var(--background-lightest); /* Lighter dark for cards */
+  background-color: var(--bg-input);
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
-  overflow: hidden; /* For pseudo-element glow */
-}
-
-.owner-card::before { /* Subtle glow on hover */
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at 50% 0, var(--primary-color) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 0;
 }
 
 .owner-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-}
-.owner-card:hover::before {
-  opacity: 0.1;
+  border-color: var(--primary-color);
+  transform: translateX(5px);
 }
 
 .owner-card.active {
-  background-color: var(--primary-color);
-  color: white;
-  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
-  transform: translateY(-5px);
-}
-.owner-card.active .owner-card-title,
-.owner-card.active .owner-card-info {
-    color: white; /* Ensure text is white when active */
-}
-.owner-card.active .highlight-address {
-    color: var(--secondary-color); /* Teal for active address */
+  background: var(--primary-gradient);
+  border-color: transparent;
+  box-shadow: var(--shadow-glow);
+  transform: translateX(5px);
 }
 
+.owner-card.active .owner-card-title,
+.owner-card.active .owner-card-info,
+.owner-card.active .highlight-address {
+  color: white;
+}
 
 .owner-card-title {
-  font-size: 1.3em;
-  font-weight: 600;
-  color: var(--primary-color); /* Title uses primary color */
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 1;
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 10px 0;
 }
 
 .owner-card-info {
-  font-size: 0.9em;
-  color: var(--text-color-light);
-  margin-bottom: 5px;
-  position: relative;
-  z-index: 1;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin: 0 0 5px 0;
 }
 
-
-/* Full Details Card (Right Side) */
+/* Details Right Panel */
 .full-details-section {
-  background-color: var(--background-medium);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  min-height: 400px; /* Ensure it has some height */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Center content vertically */
-  align-items: center; /* Center content horizontally */
-  text-align: center;
-}
-
-.full-details-card {
-  width: 100%; /* Take full width of its container */
-  /* Remove individual card styling, use section styling */
+  background-color: var(--bg-card);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
 }
 
 .full-details-card h3 {
-  color: var(--primary-color);
+  color: var(--text-main);
+  font-size: 1.8em;
+  margin-top: 0;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 15px;
-  margin-bottom: 20px;
-  font-weight: 600;
-  font-size: 1.8em;
-  text-align: center;
 }
 
 .full-details-card p {
-  margin-bottom: 10px;
-  line-height: 1.7;
-  color: var(--text-color-light);
-  text-align: left; /* Align text left within details card */
+  font-size: 1em;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+  line-height: 1.6;
 }
 
 .full-details-card strong {
-  color: var(--text-color-dark);
+  color: var(--text-dark);
+  display: inline-block;
+  min-width: 180px;
 }
 
 .no-details-message {
+  text-align: center;
+  color: var(--text-muted);
   font-size: 1.2em;
-  color: var(--text-color-light);
+  margin-top: 50px;
 }
 
-/* Media Queries for Responsiveness */
-@media (max-width: 992px) {
+/* --- 10. RESPONSIVE DESIGN --- */
+@media (max-width: 1024px) {
   .view-land-layout {
-    flex-direction: column; /* Stack columns on smaller screens */
+    grid-template-columns: 1fr; /* Stack vertically */
   }
-  .owner-timeline-section, .full-details-section {
-    min-width: unset; /* Remove min-width when stacked */
+  .owner-timeline-section {
+    max-height: 400px;
   }
 }
 
 @media (max-width: 768px) {
-  .App {
-    margin: 20px 10px;
-    padding: 20px;
-    gap: 20px;
-  }
-  .App h1 {
-    font-size: 2em;
-  }
-  nav {
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-  nav a {
-    padding: 8px 15px;
-    font-size: 0.9em;
-  }
-  .form-container, .owner-timeline-section, .full-details-section {
-    padding: 20px;
-  }
-  .form-container h2 {
-    font-size: 1.6em;
-  }
-  .input-group {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .input-group button {
-    width: 100%;
-  }
-  .owner-card-title {
-    font-size: 1.1em;
-  }
-  .owner-card-info {
-    font-size: 0.85em;
-  }
-  .full-details-card h3 {
-    font-size: 1.5em;
-  }
-}
-
-@media (max-width: 480px) {
-  .App h1 {
-    font-size: 1.8em;
-  }
-  .form-container h2 {
-    font-size: 1.4em;
-  }
-  .owner-timeline-section h3, .full-details-card h3 {
-    font-size: 1.3em;
-  }
-  .owner-card-wrapper {
-    gap: 15px;
-  }
+  .App { padding: 15px; }
+  .App h1 { font-size: 2.2em; }
+  nav { flex-direction: column; width: 100%; }
+  nav a { text-align: center; width: 100%; }
+  .form-container, .lands-container { padding: 20px; }
+  .form-container h2 { font-size: 1.8em; }
+  .input-group { flex-direction: column; }
+  .input-group button { width: 100%; }
+  
+  table, thead, tbody, th, td, tr { display: block; }
+  thead tr { position: absolute; top: -9999px; left: -9999px; }
+  tr { border: 1px solid var(--border-color); margin-bottom: 15px; border-radius: 10px; background: var(--bg-input); }
+  td { border: none; border-bottom: 1px solid var(--border-color); position: relative; padding-left: 50%; text-align: right; }
+  td:before { position: absolute; top: 18px; left: 15px; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: var(--text-muted); text-transform: uppercase; font-size: 0.8em; }
+  
+  /* Labels for mobile table */
+  td:nth-of-type(1):before { content: "ID"; }
+  td:nth-of-type(2):before { content: "Data Hash"; }
+  td:nth-of-type(3):before { content: "Owner"; }
+  td:nth-of-type(4):before { content: "Address"; }
+  td:nth-of-type(5):before { content: "Area"; }
 }

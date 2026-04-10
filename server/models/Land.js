@@ -17,15 +17,17 @@ const LandSchema = new mongoose.Schema({
     propertyAddress: { type: String, required: true },
     landArea: { type: String, required: true },
     propertyValue: { type: Number, required: true },
+    
+    // --- MAP COORDINATES ADDED HERE ---
+    latitude: { type: String, required: true },
+    longitude: { type: String, required: true },
+    // ----------------------------------
+
     onChainId: { type: Number, default: null },
     registrationDate: { type: Date, default: Date.now },
 
-
     // This array will store the chronological history of ALL owners
     // The current owner is NOT in this array; their details are in the main fields.
-    
-    
-
     ownershipHistory: {
         type: [OwnershipRecordSchema],
         default: []

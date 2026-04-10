@@ -1,11 +1,11 @@
-// server/index.js (FINAL UPDATED VERSION - Please use this one)
+// server/index.js (FINAL UPDATED VERSION with Lat/Lng & Clear Database support)
 
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-const Land = require('./models/Land'); // Make sure to use the updated Land model
+const Land = require('./models/Land'); 
 
 const app = express();
 app.use(cors());
@@ -16,17 +16,16 @@ const MONGO_URI = process.env.MONGO_URI;
 mongoose.connect(MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB!"))
   .catch(err => console.error("MongoDB connection error:", err));
-  
 
 // --- API Routes ---
 
-
-// 1. Route to register new land data (UPDATED to initialize ownershipHistory)
+// 1. Route to register new land data
 app.post('/register-land', async (req, res) => {
     try {
         console.log("Received data for registration:", req.body);
 
-        const { ownerName, khasraNo, ownerWalletAddress, propertyAddress, landArea, propertyValue } = req.body;
+        // NAYI FIELDS YAHAN ADD KI HAIN (latitude, longitude)
+        const { ownerName, khasraNo, ownerWalletAddress, propertyAddress, landArea, propertyValue, latitude, longitude } = req.body;
 
         const newLand = new Land({
             ownerName,
@@ -35,12 +34,13 @@ app.post('/register-land', async (req, res) => {
             propertyAddress,
             landArea,
             propertyValue,
-            registrationDate: new Date(), // Set registration date here
-            // Initialize ownershipHistory with the first owner
+            latitude,   // <-- Added
+            longitude,  // <-- Added
+            registrationDate: new Date(), 
             ownershipHistory: [{
                 ownerName: ownerName,
                 ownerWalletAddress: ownerWalletAddress,
-                transferDate: new Date() // The date of initial registration
+                transferDate: new Date() 
             }]
         });
 
@@ -56,7 +56,7 @@ app.post('/register-land', async (req, res) => {
     }
 });
 
-// 2. Route to update the onChainId for a land record after blockchain registration (NO CHANGE)
+// 2. Route to update the onChainId for a land record after blockchain registration
 app.patch('/update-onchain-id/:mongoId', async (req, res) => {
     try {
         const { mongoId } = req.params; 
@@ -80,11 +80,9 @@ app.patch('/update-onchain-id/:mongoId', async (req, res) => {
     }
 });
 
-// 3. Route to get land details by onChainId (NO CHANGE)
+// 3. Route to get land details by onChainId
 app.get('/land-by-onchain-id/:onChainId', async (req, res) => {
     try {
-        // We do not need to populate ownershipHistory here, just fetch the land record as is.
-        // The frontend will construct the full timeline from this data.
         const land = await Land.findOne({ onChainId: req.params.onChainId });
         if (!land) {
             return res.status(404).json({ message: 'Land not found in off-chain database.' });
@@ -96,7 +94,7 @@ app.get('/land-by-onchain-id/:onChainId', async (req, res) => {
     }
 });
 
-// 4. Route to update land owner details after on-chain transfer (UPDATED - CRITICAL FIX FOR HISTORY ORDER)
+// 4. Route to update land owner details after on-chain transfer
 app.patch('/update-land-owner/:mongoRecordId', async (req, res) => {
     try {
         const { newOwnerWalletAddress, newOwnerName } = req.body;
@@ -110,24 +108,17 @@ app.patch('/update-land-owner/:mongoRecordId', async (req, res) => {
             return res.status(404).json({ message: 'Off-chain land record not found.' });
         }
 
-        // The current owner's details are stored in the main fields (landRecord.ownerName, landRecord.ownerWalletAddress).
-        // Before we update these main fields with the new owner's details,
-        // we take the *current* owner's details and add them to the ownershipHistory array.
         const previousOwnerEntry = {
             ownerName: landRecord.ownerName,
             ownerWalletAddress: landRecord.ownerWalletAddress,
-            transferDate: new Date() // The date of this transfer
+            transferDate: new Date()
         };
         
-        // Push the previous owner to the end of the history array.
-        // This ensures the array is always in chronological order (oldest to newest).
         landRecord.ownershipHistory.push(previousOwnerEntry); 
 
-        // Now, update the main fields to reflect the new owner
         landRecord.ownerName = newOwnerName;
         landRecord.ownerWalletAddress = newOwnerWalletAddress;
-        // Optionally, update registrationDate to reflect the new owner's acquisition date
-        landRecord.registrationDate = new Date(); // Or keep the original registrationDate for the land itself
+        landRecord.registrationDate = new Date(); 
 
         const updatedLand = await landRecord.save(); 
 
@@ -142,6 +133,30 @@ app.patch('/update-land-owner/:mongoRecordId', async (req, res) => {
     }
 });
 
+// 5. --- DANGER ZONE: Delete All Lands API (For Testing Only) ---
+app.delete('/clear-all-lands', async (req, res) => {
+    try {
+        await Land.deleteMany({});
+        res.status(200).json({ message: "All land records successfully deleted from the database." });
+    } catch (error) {
+        console.error("Error deleting all records:", error);
+        res.status(500).json({ message: "Error clearing database.", error: error.message });
+    }
+});
+
+// --- YEH NAYA ROUTE ADD KARO server/index.js MEIN ---
+
+// 6. Route to fetch ALL lands for the search bar and cards
+app.get('/all-lands', async (req, res) => {
+    try {
+        // Sirf wo lands bhejenge jinka onChainId null nahi hai (jo successfully blockchain pe hain)
+        const lands = await Land.find({ onChainId: { $ne: null } });
+        res.status(200).json({ message: 'Lands fetched successfully', data: lands });
+    } catch (error) {
+        console.error("Error fetching all lands:", error);
+        res.status(500).json({ message: 'Error fetching lands.', error: error.message });
+    }
+});
 
 const PORT = 5000;
 app.listen(PORT, () => {

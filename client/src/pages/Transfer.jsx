@@ -1,15 +1,17 @@
+// client/src/pages/Transfer.jsx (UPDATED FOR NEW THEME)
+
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
 const Transfer = ({ contract, connectedAccount }) => { 
     const [landId, setLandId] = useState("");
     const [newOwnerAddress, setNewOwnerAddress] = useState("");
-    const [newOwnerName, setNewOwnerName] = useState(""); // <-- Naya state
+    const [newOwnerName, setNewOwnerName] = useState(""); 
     const [loading, setLoading] = useState(false);
     const [currentOwner, setCurrentOwner] = useState(""); 
     const [offChainMongoId, setOffChainMongoId] = useState(""); 
     const [governmentAuthorityAddress, setGovernmentAuthorityAddress] = useState(null);
-    const [currentOwnerName, setCurrentOwnerName] = useState(""); // <-- Current owner ka naam display karne ke liye
+    const [currentOwnerName, setCurrentOwnerName] = useState(""); 
 
     // Effect to fetch the Government Authority address from the 'contract' prop
     useEffect(() => {
@@ -42,7 +44,7 @@ const Transfer = ({ contract, connectedAccount }) => {
                         const data = await response.json();
                         if (response.ok && data.data && data.data._id) {
                             setOffChainMongoId(data.data._id);
-                            setCurrentOwnerName(data.data.ownerName); // <-- Off-chain se current owner ka naam set karein
+                            setCurrentOwnerName(data.data.ownerName); 
                         } else {
                             setOffChainMongoId(""); 
                             setCurrentOwnerName("N/A (Off-chain data missing)");
@@ -102,7 +104,7 @@ const Transfer = ({ contract, connectedAccount }) => {
             alert("New owner cannot be the current owner.");
             return;
         }
-        // Naye owner ke naam ke liye validation add karein
+        
         if (!newOwnerName.trim()) {
             alert("Please enter the new owner's name.");
             return;
@@ -131,7 +133,7 @@ const Transfer = ({ contract, connectedAccount }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     newOwnerWalletAddress: newOwnerAddress,
-                    newOwnerName: newOwnerName // <-- Naya naam yahan pass ho raha hai
+                    newOwnerName: newOwnerName 
                 })
             });
 
@@ -141,11 +143,12 @@ const Transfer = ({ contract, connectedAccount }) => {
             }
             console.log("Off-chain update successful:", offChainData.message);
 
-            alert("Ownership Transfer Complete! Both on-chain and off-chain records updated.");
+            alert("✅ Ownership Transfer Complete! Both on-chain and off-chain records updated.");
+            
             // Reset form and states
             setLandId(""); 
             setNewOwnerAddress("");
-            setNewOwnerName(""); // <-- Naya state reset karein
+            setNewOwnerName(""); 
             setCurrentOwner("");
             setCurrentOwnerName("");
             setOffChainMongoId("");
@@ -159,54 +162,121 @@ const Transfer = ({ contract, connectedAccount }) => {
     };
 
     return (
-        <div className="form-container">
-            <h2>Transfer Land Ownership</h2>
-            {governmentAuthorityAddress && (
-                <p className="info-text">
-                    Government Authority: <span className="highlight-address">{governmentAuthorityAddress}</span>
-                </p>
-            )}
-            <form onSubmit={handleTransferOwnership}>
-                <input
-                    type="number"
-                    value={landId}
-                    onChange={(e) => setLandId(e.target.value)}
-                    placeholder="Land ID to Transfer (e.g., 1)"
-                    required
-                />
-                {landId && currentOwner && currentOwner !== "Not Found" && currentOwner !== "Error" && (
-                    <>
-                        <p className="info-text">Current Owner Address: <span className="highlight-address">{currentOwner}</span></p>
-                        <p className="info-text">Current Owner Name: <span className="highlight-text">{currentOwnerName}</span></p> {/* <-- Current owner ka naam */}
-                    </>
-                )}
-                {landId && currentOwner === "Not Found" && (
-                    <p className="error-text">No land found with this ID.</p>
-                )}
-                {landId && currentOwner === "Error" && (
-                    <p className="error-text">Error fetching owner.</p>
-                )}
-
-                <input
-                    type="text"
-                    value={newOwnerAddress}
-                    onChange={(e) => setNewOwnerAddress(e.target.value)}
-                    placeholder="New Owner's Wallet Address"
-                    required
-                />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', animation: 'fadeIn 0.5s ease-in' }}>
+            <div className="form-container" style={{ maxWidth: '600px', width: '100%' }}>
                 
-                <input // <-- Naya input field for new owner's name
-                    type="text"
-                    value={newOwnerName}
-                    onChange={(e) => setNewOwnerName(e.target.value)}
-                    placeholder="New Owner's Full Name"
-                    required
-                />
+                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                    <h2 style={{ margin: '0 0 10px 0', background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        Transfer Ownership
+                    </h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>
+                        Transfer property rights securely on the blockchain.
+                    </p>
+                </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Processing Transfer..." : "Transfer Ownership"}
-                </button>
-            </form>
+                {governmentAuthorityAddress && (
+                    <div style={{
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+                        border: '1px solid var(--success-color)', 
+                        color: 'var(--success-color)',
+                        padding: '12px', 
+                        borderRadius: '10px', 
+                        fontSize: '13px', 
+                        marginBottom: '30px',
+                        textAlign: 'center', 
+                        fontFamily: "'Fira Code', monospace",
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <strong>Govt Authority:</strong> {governmentAuthorityAddress}
+                    </div>
+                )}
+
+                <form onSubmit={handleTransferOwnership}>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            Asset Token ID
+                        </label>
+                        <input
+                            type="number"
+                            className="input-field"
+                            value={landId}
+                            onChange={(e) => setLandId(e.target.value)}
+                            placeholder="Enter Land ID (e.g., 1)"
+                            required
+                        />
+                    </div>
+
+                    {/* --- CURRENT OWNER INFO STATUS BOX --- */}
+                    <div style={{ minHeight: '80px', marginBottom: '20px' }}>
+                        {landId && currentOwner && currentOwner !== "Not Found" && currentOwner !== "Error" && (
+                            <div style={{
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                border: '1px solid rgba(59, 130, 246, 0.3)',
+                                padding: '15px',
+                                borderRadius: '10px',
+                                animation: 'fadeIn 0.3s ease-in'
+                            }}>
+                                <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-muted)' }}>
+                                    Current Owner: <span className="highlight-text" style={{ fontSize: '16px' }}>{currentOwnerName}</span>
+                                </p>
+                                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    Wallet: <span className="highlight-address" style={{ fontSize: '12px' }}>{currentOwner}</span>
+                                </p>
+                            </div>
+                        )}
+                        {landId && currentOwner === "Not Found" && (
+                            <p className="error-text" style={{ margin: 0 }}>❌ No land found with this ID on the network.</p>
+                        )}
+                        {landId && currentOwner === "Error" && (
+                            <p className="error-text" style={{ margin: 0 }}>❌ Error fetching owner details.</p>
+                        )}
+                    </div>
+                    {/* ----------------------------------- */}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            New Owner Wallet Address
+                        </label>
+                        <input
+                            type="text"
+                            className="input-field"
+                            style={{ fontFamily: "'Fira Code', monospace" }}
+                            value={newOwnerAddress}
+                            onChange={(e) => setNewOwnerAddress(e.target.value)}
+                            placeholder="0x..."
+                            required
+                        />
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '25px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            New Owner Full Name
+                        </label>
+                        <input 
+                            type="text"
+                            className="input-field"
+                            value={newOwnerName}
+                            onChange={(e) => setNewOwnerName(e.target.value)}
+                            placeholder="Enter New Owner's Name"
+                            required
+                        />
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        className="btn-primary" 
+                        style={{ width: '100%', padding: '16px', opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+                        disabled={loading || currentOwner === "Not Found" || currentOwner === "Error" || !currentOwner}
+                    >
+                        {loading ? "⚙️ Processing Transfer..." : "Transfer Asset"}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
