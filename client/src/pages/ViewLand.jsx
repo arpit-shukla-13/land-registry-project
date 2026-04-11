@@ -1,4 +1,4 @@
-// client/src/pages/ViewLand.jsx (MARKETPLACE & SEARCH UPDATE)
+// client/src/pages/ViewLand.jsx (UPDATED FOR MODERN THEME & FIXED MAP)
 
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
@@ -28,7 +28,7 @@ const ViewLand = ({ contract }) => {
                 const data = await response.json();
                 if (response.ok && data.data) {
                     setAllOffChainLands(data.data);
-                    setDisplayedCards(data.data); // Show all initially
+                    setDisplayedCards(data.data); 
                 }
             } catch (err) {
                 console.error("Error fetching all lands for search:", err);
@@ -44,24 +44,22 @@ const ViewLand = ({ contract }) => {
 
         if (query.trim() === "") {
             setSuggestions([]);
-            setDisplayedCards(allOffChainLands); // Reset to all if empty
+            setDisplayedCards(allOffChainLands); 
             return;
         }
 
-        // Filter logic: Check Address, City, Khasra, or Owner Name
         const lowerQuery = query.toLowerCase();
         const filtered = allOffChainLands.filter(land => 
-            land.propertyAddress.toLowerCase().includes(lowerQuery) ||
-            land.khasraNo.toLowerCase().includes(lowerQuery) ||
-            land.ownerName.toLowerCase().includes(lowerQuery) ||
-            land.onChainId.toString().includes(lowerQuery)
+            (land.propertyAddress && land.propertyAddress.toLowerCase().includes(lowerQuery)) ||
+            (land.khasraNo && land.khasraNo.toLowerCase().includes(lowerQuery)) ||
+            (land.ownerName && land.ownerName.toLowerCase().includes(lowerQuery)) ||
+            (land.onChainId && land.onChainId.toString().includes(lowerQuery))
         );
 
-        setSuggestions(filtered.slice(0, 5)); // Show top 5 suggestions
-        setDisplayedCards(filtered); // Update main grid
+        setSuggestions(filtered.slice(0, 5)); 
+        setDisplayedCards(filtered); 
     };
 
-    // Helper to format currency
     const formatCurrency = (value) => {
         if (!value || isNaN(value)) return value;
         return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
@@ -80,7 +78,7 @@ const ViewLand = ({ contract }) => {
         }
 
         setLoading(true);
-        setViewMode('detail'); // Switch view
+        setViewMode('detail'); 
 
         try {
             const currentLandId = landRecord.onChainId;
@@ -200,7 +198,7 @@ const ViewLand = ({ contract }) => {
         },
         grid: {
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
             gap: '30px',
             paddingBottom: '50px'
         },
@@ -216,13 +214,13 @@ const ViewLand = ({ contract }) => {
         },
         cardMap: {
             width: '100%',
-            height: '180px',
+            height: '200px',
             border: 'none',
-            pointerEvents: 'none', // Prevents scrolling map inside the card
+            pointerEvents: 'none', 
             filter: 'invert(90%) hue-rotate(180deg) brightness(80%) contrast(120%)'
         },
         cardContent: {
-            padding: '20px',
+            padding: '25px',
             display: 'flex',
             flexDirection: 'column',
             flex: 1
@@ -250,7 +248,7 @@ const ViewLand = ({ contract }) => {
                         placeholder="🔍 Try 'New Delhi', 'KH-402', or 'Rahul'..."
                         value={searchInput}
                         onChange={handleSearchChange}
-                        onBlur={() => setTimeout(() => setSuggestions([]), 200)} // Hide suggestions when clicking outside
+                        onBlur={() => setTimeout(() => setSuggestions([]), 200)} 
                     />
                     
                     {/* AUTO-SUGGESTIONS DROPDOWN */}
@@ -279,6 +277,7 @@ const ViewLand = ({ contract }) => {
                 <div style={styles.grid}>
                     {displayedCards.length === 0 ? (
                         <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)', padding: '50px' }}>
+                            <div style={{ fontSize: '40px', marginBottom: '15px' }}>🏚️</div>
                             <h3>No properties found matching your search.</h3>
                         </div>
                     ) : (
@@ -287,41 +286,46 @@ const ViewLand = ({ contract }) => {
                                 key={`card-${land._id}`} 
                                 style={styles.card}
                                 onClick={() => openPropertyDetails(land)}
-                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.4)'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.4)'; e.currentTarget.style.borderColor = 'var(--primary-color)'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
                             >
-                                {/* Mini Map Thumbnail */}
+                                {/* Mini Map Thumbnail (FIXED URL) */}
                                 {land.latitude && land.longitude ? (
                                     <iframe
                                         style={styles.cardMap}
-                                        src={`https://maps.google.com/maps?q=$${land.latitude},${land.longitude}&z=14&output=embed`}
+                                        // Standard embed URL with marker at given coordinates
+                                        src={`https://maps.google.com/maps?q=${land.latitude},${land.longitude}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                                         title={`Map-${land.khasraNo}`}
                                         tabIndex="-1"
                                     ></iframe>
                                 ) : (
-                                    <div style={{...styles.cardMap, backgroundColor: '#2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px'}}>
+                                    <div style={{...styles.cardMap, backgroundColor: 'var(--bg-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px'}}>
                                         🗺️
                                     </div>
                                 )}
                                 
                                 {/* Card Info */}
                                 <div style={styles.cardContent}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                                        <h3 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '18px' }}>#{land.onChainId || 'Pending'}</h3>
-                                        <span style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-color)', padding: '4px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: 'bold' }}>VERIFIED</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                        <span style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary-color)', padding: '6px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                                            Token #{land.onChainId || 'Pending'}
+                                        </span>
+                                        <span style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-color)', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}>
+                                            VERIFIED
+                                        </span>
                                     </div>
                                     
-                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '16px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    <h4 style={{ margin: '0 0 15px 0', fontSize: '18px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         {land.propertyAddress}
                                     </h4>
                                     
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '15px' }}>
-                                        <span><strong>Khasra:</strong> {land.khasraNo}</span>
-                                        <span><strong>Owner:</strong> {land.ownerName}</span>
-                                        <span><strong>Area:</strong> {land.landArea}</span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+                                        <span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Khasra:</span> <strong style={{ color: 'var(--text-dark)' }}>{land.khasraNo}</strong></span>
+                                        <span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Owner:</span> <strong style={{ color: 'var(--text-dark)' }}>{land.ownerName}</strong></span>
+                                        <span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Area:</span> <strong style={{ color: 'var(--text-dark)' }}>{land.landArea}</strong></span>
                                     </div>
 
-                                    <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-color)', fontSize: '18px', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                                    <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border-color)', fontSize: '22px', fontWeight: '800', color: 'var(--success-color)' }}>
                                         {formatCurrency(land.propertyValue)}
                                     </div>
                                 </div>
@@ -341,27 +345,27 @@ const ViewLand = ({ contract }) => {
             
             <button 
                 onClick={() => setViewMode('search')}
-                style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-main)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-card)'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', padding: '12px 24px', borderRadius: '10px', cursor: 'pointer', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '600', transition: 'all 0.2s' }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-card)'; e.currentTarget.style.borderColor = 'var(--primary-color)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-input)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
             >
                 ← Back to Search Results
             </button>
 
             {loading ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⏳</div>
+                    <div style={{ fontSize: '3rem', marginBottom: '10px', animation: 'spin 2s linear infinite' }}>⚙️</div>
                     <h2 className="loading-text">Fetching Cryptographic Proofs...</h2>
                 </div>
             ) : error ? (
-                <div className="error-text">{error}</div>
+                <div className="error-text" style={{ padding: '30px', fontSize: '1.2em' }}>{error}</div>
             ) : (
                 landOwnerHistory.length > 0 && (
                     <div className="view-land-layout">
                         
                         {/* Left Panel: Owner Timeline */}
                         <div className="owner-timeline-section">
-                            <h3><span style={{ fontSize: '1.2em', marginRight: '8px' }}>📜</span> Ownership Timeline</h3>
+                            <h3 style={{ fontSize: '1.3em', paddingBottom: '20px' }}><span style={{ marginRight: '10px' }}>📜</span> Ownership Timeline</h3>
                             <div className="owner-card-wrapper">
                                 {landOwnerHistory.map((owner, index) => (
                                     <div
@@ -369,18 +373,18 @@ const ViewLand = ({ contract }) => {
                                         className={`owner-card ${activeOwnerWallet === owner.ownerWalletAddress && owner.isCurrentOwner ? 'active' : ''}`}
                                         onClick={() => handleOwnerCardClick(owner)}
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                            <p className="owner-card-title" style={{ margin: 0 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                            <p className="owner-card-title" style={{ margin: 0, fontSize: '1em' }}>
                                                 {owner.isCurrentOwner ? "👑 Current Owner" : `🕰️ Owner #${index + 1}`}
                                             </p>
                                             <span style={{ fontSize: '0.8em', color: owner.isCurrentOwner ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)' }}>
                                                 {new Date(owner.transferDate).toLocaleDateString('en-GB')}
                                             </span>
                                         </div>
-                                        <p className="owner-card-info">
+                                        <p className="owner-card-info" style={{ marginBottom: '8px' }}>
                                             <strong style={{color: 'inherit'}}>Name:</strong> <span className="highlight-text">{owner.ownerName}</span>
                                         </p>
-                                        <p className="owner-card-info" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <p className="owner-card-info" style={{ overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
                                             <strong style={{color: 'inherit'}}>Wallet:</strong> <span className="highlight-address" style={{ fontSize: '0.9em' }}>{owner.ownerWalletAddress}</span>
                                         </p>
                                     </div>
@@ -392,76 +396,79 @@ const ViewLand = ({ contract }) => {
                         <div className="full-details-section">
                             {selectedLandDetails && (
                                 <div className="full-details-card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px', marginBottom: '25px' }}>
-                                        <h3 style={{ borderBottom: 'none', paddingBottom: 0, margin: 0 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px', marginBottom: '30px' }}>
+                                        <h3 style={{ borderBottom: 'none', paddingBottom: 0, margin: 0, fontSize: '2em' }}>
                                             Asset Token <span style={{ color: 'var(--primary-color)' }}>#{selectedLandDetails.id}</span>
                                         </h3>
                                         <span style={{ 
                                             background: selectedLandDetails.isCurrentOwner ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)', 
                                             color: selectedLandDetails.isCurrentOwner ? 'var(--success-color)' : 'var(--warning)', 
-                                            padding: '5px 12px', borderRadius: '20px', fontSize: '0.85em', fontWeight: 'bold', textTransform: 'uppercase'
+                                            padding: '8px 16px', borderRadius: '8px', fontSize: '0.85em', fontWeight: 'bold', textTransform: 'uppercase'
                                         }}>
                                             {selectedLandDetails.isCurrentOwner ? "Current Record" : "Historical Record"}
                                         </span>
                                     </div>
 
                                     {/* Dashboard Data Grid */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
                                         
-                                        <div style={{ background: 'var(--bg-input)', padding: '15px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Owner Name</p>
-                                            <p style={{ margin: 0, fontSize: '1.1em', fontWeight: '600', color: 'var(--text-main)' }}>{selectedLandDetails.ownerName}</p>
+                                        <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owner Name</p>
+                                            <p style={{ margin: 0, fontSize: '1.2em', fontWeight: '600', color: 'var(--text-main)' }}>{selectedLandDetails.ownerName}</p>
                                         </div>
 
-                                        <div style={{ background: 'var(--bg-input)', padding: '15px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Khasra Number</p>
-                                            <p style={{ margin: 0, fontSize: '1.1em', fontWeight: '600', color: 'var(--text-main)' }}>{selectedLandDetails.khasraNo}</p>
+                                        <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Khasra Number</p>
+                                            <p style={{ margin: 0, fontSize: '1.2em', fontWeight: '600', color: 'var(--text-main)' }}>{selectedLandDetails.khasraNo}</p>
                                         </div>
 
-                                        <div style={{ background: 'var(--bg-input)', padding: '15px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Land Area</p>
-                                            <p style={{ margin: 0, fontSize: '1.1em', fontWeight: '600', color: 'var(--text-main)' }}>{selectedLandDetails.landArea}</p>
+                                        <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Land Area</p>
+                                            <p style={{ margin: 0, fontSize: '1.2em', fontWeight: '600', color: 'var(--text-main)' }}>{selectedLandDetails.landArea}</p>
                                         </div>
 
-                                        <div style={{ background: 'var(--bg-input)', padding: '15px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Market Value</p>
-                                            <p style={{ margin: 0, fontSize: '1.1em', fontWeight: '600', color: 'var(--success-color)' }}>{formatCurrency(selectedLandDetails.propertyValue)}</p>
+                                        <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Market Value</p>
+                                            <p style={{ margin: 0, fontSize: '1.2em', fontWeight: '600', color: 'var(--success-color)' }}>{formatCurrency(selectedLandDetails.propertyValue)}</p>
                                         </div>
 
-                                        <div style={{ gridColumn: '1 / -1', background: 'var(--bg-input)', padding: '15px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Owner Wallet Address</p>
-                                            <p style={{ margin: 0, fontSize: '1em', color: 'var(--secondary-color)', fontFamily: "'Fira Code', monospace", wordBreak: 'break-all' }}>{selectedLandDetails.ownerWalletAddress}</p>
+                                        <div style={{ gridColumn: '1 / -1', background: 'var(--bg-input)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Owner Wallet Address</p>
+                                            <p style={{ margin: 0, fontSize: '1.1em', color: 'var(--secondary-color)', fontFamily: "'Fira Code', monospace", wordBreak: 'break-all' }}>{selectedLandDetails.ownerWalletAddress}</p>
                                         </div>
 
-                                        <div style={{ gridColumn: '1 / -1', background: 'var(--bg-input)', padding: '15px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Physical Property Address</p>
-                                            <p style={{ margin: 0, fontSize: '1em', color: 'var(--text-main)' }}>{selectedLandDetails.propertyAddress}</p>
+                                        <div style={{ gridColumn: '1 / -1', background: 'var(--bg-input)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Physical Property Address</p>
+                                            <p style={{ margin: 0, fontSize: '1.1em', color: 'var(--text-main)' }}>{selectedLandDetails.propertyAddress}</p>
                                         </div>
 
-                                        <div style={{ gridColumn: '1 / -1', background: 'rgba(59, 130, 246, 0.05)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                                            <p style={{ margin: '0 0 5px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>On-Chain Data Hash (Cryptographic Proof)</p>
-                                            <p className="highlight-hash" style={{ margin: 0, width: '100%' }}>{selectedLandDetails.dataHash}</p>
+                                        <div style={{ gridColumn: '1 / -1', background: 'rgba(59, 130, 246, 0.05)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                                            <p style={{ margin: '0 0 8px 0', fontSize: '0.85em', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>On-Chain Data Hash (Cryptographic Proof)</p>
+                                            <p className="highlight-hash" style={{ margin: 0, width: '100%', fontSize: '1em' }}>{selectedLandDetails.dataHash}</p>
                                         </div>
                                     </div>
 
-                                    {/* --- GOOGLE MAPS IFRAME SECTION --- */}
+                                    {/* --- GOOGLE MAPS IFRAME SECTION (FIXED URL) --- */}
                                     {selectedLandDetails.latitude && selectedLandDetails.longitude && (
-                                        <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
-                                            <div style={{ padding: '12px 20px', backgroundColor: 'var(--bg-input)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <span style={{ fontSize: '1.2em' }}>📍</span>
-                                                <h4 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.1em' }}>Geolocation Map</h4>
+                                        <div style={{ borderRadius: '15px', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                                            <div style={{ padding: '15px 25px', backgroundColor: 'var(--bg-input)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <span style={{ fontSize: '1.4em' }}>📍</span>
+                                                <h4 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2em' }}>Geolocation Map</h4>
                                             </div>
                                             <iframe
                                                 width="100%"
-                                                height="350"
+                                                height="400"
                                                 style={{ border: 0, display: 'block', filter: 'invert(90%) hue-rotate(180deg) brightness(80%) contrast(120%)' }}
                                                 loading="lazy"
                                                 allowFullScreen
                                                 referrerPolicy="no-referrer-when-downgrade"
-                                                src={`https://maps.google.com/maps?q=$${selectedLandDetails.latitude},${selectedLandDetails.longitude}&z=16&output=embed`}
+                                                // Standard embed URL with marker at given coordinates
+                                                src={`https://maps.google.com/maps?q=${selectedLandDetails.latitude},${selectedLandDetails.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                                             ></iframe>
                                         </div>
                                     )}
+                                    {/* ---------------------------------- */}
+
                                 </div>
                             )}
                         </div>

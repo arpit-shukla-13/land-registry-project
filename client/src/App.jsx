@@ -132,3 +132,8 @@ function App() {
 }
 
 export default App;
+
+//cd backend
+//npx hardhat node
+//cd backend
+// npx hardhat run scripts/deploy.js --network localhost
